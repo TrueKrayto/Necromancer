@@ -1,7 +1,7 @@
 import arcade
 
 class MainMenuView(arcade.View):
-    def __init__(self):
+    def __init__(self, game):
         super().__init__()
 
     def on_draw(self):

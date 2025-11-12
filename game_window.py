@@ -11,9 +11,11 @@ class GameView(arcade.Window):
     def __init__(self):
         super().__init__(fullscreen=True, title=WINDOW_TITLE)
         self.background_color = arcade.csscolor.WHITE         
-        self.main_menu = MainMenuView()
-        self.world_map_1 = WorldMap1View(MAP_SIZE, SCALE)
-        self.show_view(self.main_menu)      
+        self.player = None   
+        self.main_menu = MainMenuView(self)
+        self.world_map_1 = WorldMap1View(self, MAP_SIZE, SCALE)
+        self.show_view(self.main_menu)
+          
 
     def on_key_press(self, symbol, modifiers): 
         if symbol == arcade.key.F9:

@@ -2,11 +2,11 @@ import arcade
 from game_sprites import PLAYER_SPRITES
 
 class Player():
-    def __init__(self, scale):
-        self.sprite =arcade.Sprite(PLAYER_SPRITES["idle_1"])
+    def __init__(self, x, y, scale):
+        self.sprite =arcade.Sprite(PLAYER_SPRITES["idle_1"], center_x=x, center_y=y)
         sprite_texture = arcade.load_texture(PLAYER_SPRITES["idle_1"])
-        self.sprite.scale = scale / sprite_texture.width        
-
+        self.sprite.scale = scale / sprite_texture.width
+       
     def draw(self):
         arcade.draw_sprite(self.sprite)
    
