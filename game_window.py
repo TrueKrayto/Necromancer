@@ -2,6 +2,8 @@ import arcade
 from main_menu import MainMenuView
 from world_map1 import WorldMap1View
 
+MAP_SIZE = 100
+SCALE = 200
 
 WINDOW_TITLE = "NECROMANCER"
 
@@ -10,7 +12,7 @@ class GameView(arcade.Window):
         super().__init__(fullscreen=True, title=WINDOW_TITLE)
         self.background_color = arcade.csscolor.WHITE         
         self.main_menu = MainMenuView()
-        self.world_map_1 = WorldMap1View()
+        self.world_map_1 = WorldMap1View(MAP_SIZE, SCALE)
         self.show_view(self.main_menu)      
 
     def on_key_press(self, symbol, modifiers): 

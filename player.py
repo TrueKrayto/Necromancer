@@ -9,5 +9,5 @@ class Player():
 
     def draw(self):
         arcade.draw_sprite(self.sprite)
-
+   
     
