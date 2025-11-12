@@ -8,10 +8,11 @@ class Tile:
         self.terrain = terrain
 
         self.texture = TILE_TEXTURES.get(terrain, TILE_TEXTURES["grass"])
-        self.sprite = arcade.Sprite(center_x=x * scale + scale // 2,
-                                    center_y=y * scale + scale // 2)
-        self.sprite.texture = self.texture
-        self.sprite.scale = scale / self.texture.width
+        self.sprite = arcade.Sprite(path_or_texture=self.texture)
+        self.sprite.width = scale
+        self.sprite.height = scale
+        self.sprite.center_x = x * scale + scale / 2
+        self.sprite.center_y = y * scale + scale / 2
 
     def draw(self):
         arcade.draw_sprite(self.sprite)

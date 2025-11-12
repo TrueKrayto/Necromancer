@@ -1,4 +1,5 @@
 import arcade
+from arcade import Vec2
 from map_tiles import Tile
 from player import Player
 
@@ -10,11 +11,17 @@ class WorldMap1View(arcade.View):
         self.scale = scale
         self.tile_grid = []
         self.game = game
+        self.held_keys = set()
+        self.camera = arcade.Camera2D()
         self.generate_tile_map() 
         
-                
+    def on_update(self, delta_time):
+        self.game.player.update(delta_time, self.held_keys)
+        self.center_camera_to_player()
+
     def on_draw(self):
         self.clear()
+        self.camera.use()
         for row in self.tile_grid:
             for tile in row:
                 tile.draw()
@@ -38,10 +45,16 @@ class WorldMap1View(arcade.View):
     def create_player(self):
         x, y = self.game.get_screen_dimensions()
         center_x = x // 2
-        cente_y = y // 2
-        self.game.player = Player(center_x, cente_y, self.scale)
+        center_y = y // 2
+        self.game.player = Player(center_x, center_y, self.scale)
         
+    def on_key_press(self, symbol, modifiers):
+        self.held_keys.add(symbol)
         
+    def on_key_release(self, symbol, modifiers):
+        self.held_keys.discard(symbol)
 
-
-
+    def center_camera_to_player(self):
+        x, y = self.game.player.get_position()
+        self.camera.position = Vec2(x,y)
+    
