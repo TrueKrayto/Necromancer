@@ -5,5 +5,6 @@ PLAYER_SPRITES = {
                   }
 
 TILE_TEXTURES = {
-    "grass": arcade.load_texture("assets/map_tiles/grass_tile.png")
+    "grass": arcade.load_texture("assets/map_tiles/grass_tile.png"),
+    "water": arcade.load_texture("assets/map_tiles/water_tile.png")
                 }
