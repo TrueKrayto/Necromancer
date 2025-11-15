@@ -14,6 +14,9 @@ class Tile:
         self.sprite.center_x = x * scale + scale / 2
         self.sprite.center_y = y * scale + scale / 2
 
+    def get_sprite(self):
+        return self.sprite
+
     def draw(self):
         arcade.draw_sprite(self.sprite)
 

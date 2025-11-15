@@ -10,6 +10,7 @@ class WorldMap1View(arcade.View):
         self.map_size = map_size
         self.scale = scale
         self.tile_grid = []
+        self.tile_sprite_list = arcade.SpriteList()
         self.game = game
         self.held_keys = set()
         self.camera = arcade.Camera2D()
@@ -25,11 +26,14 @@ class WorldMap1View(arcade.View):
     def on_draw(self):
         self.clear()
         self.camera.use()
+        self.tile_sprite_list.draw()
+        """
         for row in self.visible_tiles:
             for tile in row:
-                tile.draw()               
+                tile.draw()  
+                """             
         if self.game.player:
-            self.game.player.draw()
+            self.game.player.draw() 
 
     def on_show_view(self):        
         self.background_color = arcade.csscolor.WHITE
@@ -43,6 +47,7 @@ class WorldMap1View(arcade.View):
             for x in range(self.map_size):
                 tile = Tile(x, y, self.scale)
                 row.append(tile)
+                self.tile_sprite_list.append(tile.get_sprite())
             self.tile_grid.append(row)        
 
     def create_player(self):
