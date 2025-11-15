@@ -27,3 +27,6 @@ class Tile:
     
     def get_index(self):
         return self.y, self.x 
+    
+    def get_center(self):
+        return self.sprite.center_x, self.sprite.center_y

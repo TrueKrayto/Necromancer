@@ -20,6 +20,7 @@ class WorldMap1View(arcade.View):
     def on_update(self, delta_time):
         self.game.player.update(delta_time, self.held_keys)
         self.center_camera_to_player()
+        # slightly redundant call, sprite list removes need for this
         self.select_visible_tiles()
      
 
@@ -27,11 +28,7 @@ class WorldMap1View(arcade.View):
         self.clear()
         self.camera.use()
         self.tile_sprite_list.draw()
-        """
-        for row in self.visible_tiles:
-            for tile in row:
-                tile.draw()  
-                """             
+
         if self.game.player:
             self.game.player.draw() 
 
@@ -51,10 +48,8 @@ class WorldMap1View(arcade.View):
             self.tile_grid.append(row)        
 
     def create_player(self):
-        x, y = self.game.get_screen_dimensions()
-        center_x = x // 2
-        center_y = y // 2
-        self.game.player = Player(center_x, center_y, self.scale)
+        x, y = self.center_of_map()       
+        self.game.player = Player(x, y, self.scale)       
         
     def on_key_press(self, symbol, modifiers):
         self.held_keys.add(symbol)
@@ -77,8 +72,7 @@ class WorldMap1View(arcade.View):
     def select_visible_tiles(self):        
         radius = 10
         self.visible_tiles.clear()
-        player_pos_x, player_pos_y = self.game.player.get_position()
-        print(f"Player position: {player_pos_x, player_pos_y}")
+        player_pos_x, player_pos_y = self.game.player.get_position()        
         current_tile = self.get_tile_at(player_pos_x, player_pos_y)
         if current_tile is None:             
              return
@@ -93,3 +87,8 @@ class WorldMap1View(arcade.View):
         start = max(index - distance, 0)
         end = index + distance + 1
         return lst[start:end]
+    
+    def center_of_map(self):
+        mid_y = len(self.tile_grid) // 2          
+        mid_x = len(self.tile_grid[mid_y]) // 2          
+        return self.tile_grid[mid_y][mid_x].get_center()
