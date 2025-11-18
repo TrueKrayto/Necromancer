@@ -4,10 +4,12 @@ import arcade.gui
 class MainMenuView(arcade.View):
     def __init__(self, game):
         super().__init__()
+        self.game = game
         self.manager = arcade.gui.UIManager()
         new_game_button = arcade.gui.UIFlatButton(text="New Game", width=200)
         @new_game_button.event("on_click")
         def start_new_game(event):
+            self.game.player = None
             self.window.show_view(self.window.world_map_1)
 
         self.anchor = self.manager.add(arcade.gui.UIAnchorLayout())

@@ -23,4 +23,9 @@ class GameView(arcade.Window):
 
     def get_screen_dimensions(self):
         return self.get_size()  # (width, height)
+    
+    def get_main_menu_view(self):
+        return self.main_menu
 
+    def change_view(self, view):
+        self.show_view(view)

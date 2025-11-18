@@ -1,8 +1,11 @@
 import arcade
+import random
+from pause_menu import PauseMenu
 from arcade import Vec2
 from map_tiles import Tile
 from player import Player
 
+WATER_CHANCE = 10
 
 class WorldMap1View(arcade.View):
     def __init__(self, game, map_size, scale):
@@ -15,14 +18,25 @@ class WorldMap1View(arcade.View):
         self.held_keys = set()
         self.camera = arcade.Camera2D()
         self.generate_tile_map()
-        self.visible_tiles = []       
+        self.visible_tiles = []  
+        self.paused = False 
+        # The pause menu  
+        self.pause_menu = PauseMenu(self.game, self)
+        self.pause_menu.pause_frame()
         
     def on_update(self, delta_time):
-        self.game.player.update(delta_time, self.held_keys)
-        self.center_camera_to_player()
-        # slightly redundant call, sprite list removes need for this
-        self.select_visible_tiles()
+        if not self.paused:
+            self.game.player.update(delta_time, self.held_keys)
+            self.center_camera_to_player()
+            # slightly redundant call, sprite list removes need for this
+            self.select_visible_tiles()
      
+    def toggle_pause(self):
+        self.paused = not self.paused
+        if self.paused:
+            self.pause_menu.manager.enable()
+        else:
+            self.pause_menu.manager.disable()
 
     def on_draw(self):
         self.clear()
@@ -31,6 +45,9 @@ class WorldMap1View(arcade.View):
 
         if self.game.player:
             self.game.player.draw() 
+
+        if self.paused:
+            self.pause_menu.manager.draw()
 
     def on_show_view(self):        
         self.background_color = arcade.csscolor.WHITE
@@ -42,7 +59,9 @@ class WorldMap1View(arcade.View):
         for y in range(self.map_size):
             row = []
             for x in range(self.map_size):
-                tile = Tile(x, y, self.scale)
+                tile = Tile(x, y, self.scale, self)
+                if random.randint(0,100) <= WATER_CHANCE:
+                    tile.set_terrain("water")
                 row.append(tile)
                 self.tile_sprite_list.append(tile.get_sprite())
             self.tile_grid.append(row)        
@@ -52,7 +71,10 @@ class WorldMap1View(arcade.View):
         self.game.player = Player(x, y, self.scale)       
         
     def on_key_press(self, symbol, modifiers):
-        self.held_keys.add(symbol)
+        if symbol == arcade.key.ESCAPE:
+            self.toggle_pause()
+        else:
+            self.held_keys.add(symbol)
         
     def on_key_release(self, symbol, modifiers):
         self.held_keys.discard(symbol)
@@ -92,3 +114,5 @@ class WorldMap1View(arcade.View):
         mid_y = len(self.tile_grid) // 2          
         mid_x = len(self.tile_grid[mid_y]) // 2          
         return self.tile_grid[mid_y][mid_x].get_center()
+
+

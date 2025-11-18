@@ -2,7 +2,9 @@ import arcade
 from game_sprites import TILE_TEXTURES
 
 class Tile:
-    def __init__(self, x, y, scale, terrain="grass"):
+    def __init__(self, x, y, scale, map, terrain="grass"):
+        self.map = map
+        # sprite
         self.x = x
         self.y = y
         self.terrain = terrain
@@ -13,6 +15,18 @@ class Tile:
         self.sprite.height = scale
         self.sprite.center_x = x * scale + scale / 2
         self.sprite.center_y = y * scale + scale / 2
+        # flags
+        self.passable = True
+        self.has_entity = False
+        self.entities = []
+
+    def set_passable(self, bool):
+        if bool == True or bool == False:
+            self.passable = bool
+        return
+
+    def add_entity(self, entity):
+        self.entities.append(entity)
 
     def get_sprite(self):
         return self.sprite
