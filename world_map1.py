@@ -26,7 +26,7 @@ class WorldMap1View(arcade.View):
     def on_update(self, delta_time):
         if not self.paused:
             if self.game.player:
-                self.game.player.update(delta_time, self.held_keys)
+                self.game.player.update(delta_time, self.held_keys, self)
                 self.center_camera_to_player()
                 # slightly redundant call, sprite list removes need for this
                 self.select_visible_tiles()
@@ -69,6 +69,7 @@ class WorldMap1View(arcade.View):
                 tile = Tile(x, y, self.scale, self)
                 if random.randint(0,100) <= WATER_CHANCE:
                     tile.set_terrain("water")
+                    tile.set_passable(False)
                 row.append(tile)
                 self.tile_sprite_list.append(tile.get_sprite())
             self.tile_grid.append(row)        
@@ -79,8 +80,15 @@ class WorldMap1View(arcade.View):
         spawn_tile = self.get_tile_at(x,y)
         spawn_area = self.get_neighbours(spawn_tile, 1, flat=True)
         for tile in spawn_area:
-            tile.set_terrain("black stone")       
-        
+            tile.set_terrain("black stone")
+            tile.set_passable(True)       
+
+    def is_position_passable(self, x, y):
+        tile = self.get_tile_at(x, y)
+        if tile is None:
+            return False
+        return tile.passable
+
     def on_key_press(self, symbol, modifiers):
         if symbol == arcade.key.ESCAPE:
             self.toggle_pause()

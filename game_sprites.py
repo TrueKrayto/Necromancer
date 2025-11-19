@@ -1,7 +1,7 @@
 import arcade
 
 PLAYER_SPRITES = {
-        "idle_1":"assets/sprites/player_idle_1.png"
+        "idle_1":"assets/sprites/player_idle_2.png"
                   }
 
 TILE_TEXTURES = {
