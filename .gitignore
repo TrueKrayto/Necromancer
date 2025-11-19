@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 venv/
 
+test_script.py
+
 # C extensions
 *.so
 

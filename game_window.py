@@ -18,8 +18,7 @@ class GameView(arcade.Window):
           
 
     def on_key_press(self, symbol, modifiers): 
-        if symbol == arcade.key.F9:
-            self.close()
+        pass
 
     def get_screen_dimensions(self):
         return self.get_size()  # (width, height)

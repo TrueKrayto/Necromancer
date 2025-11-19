@@ -61,7 +61,7 @@ class PauseMenu:
         self.frame.add(
             child=self.box,
             anchor_x="center_x",
-            anchor_y="top"
+            anchor_y="center_y"
         )
 
         # ---------------------------
@@ -78,6 +78,7 @@ class PauseMenu:
         @main_menu_button.event("on_click")
         def return_to_main_menu(event):
             pause_menu.game.change_view(pause_menu.main_menu)
+            pause_menu.view.clear_all()
             pause_menu.view.toggle_pause()
 
         options_button = arcade.gui.UIFlatButton(text="Options", width=200)

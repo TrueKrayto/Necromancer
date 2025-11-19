@@ -6,17 +6,48 @@ class MainMenuView(arcade.View):
         super().__init__()
         self.game = game
         self.manager = arcade.gui.UIManager()
-        new_game_button = arcade.gui.UIFlatButton(text="New Game", width=200)
+        self.anchor = self.manager.add(arcade.gui.UIAnchorLayout(size_hint=(1,1)))
+        self.frame = arcade.gui.UIAnchorLayout(
+            width=800,
+            height=900,
+            size_hint=None
+        )
+        self.frame.with_padding(all=20)
+        self.anchor.add(
+            child=self.frame,
+            anchor_x="center_x",
+            anchor_y="center_y"
+        )
+
+        self.button_box = arcade.gui.UIBoxLayout(
+            align="center",
+            space_between=30
+            )
+        
+        title = arcade.gui.UILabel(
+            text="Necromancer",
+            text_color=arcade.color.ALIZARIN_CRIMSON,
+            font_size=100
+        )
+
+        new_game_button = arcade.gui.UIFlatButton(text="New Game", width=200)        
         @new_game_button.event("on_click")
         def start_new_game(event):
             self.game.player = None
             self.window.show_view(self.window.world_map_1)
+        quit_button = arcade.gui.UIFlatButton(text="QUIT", width=200)
+        @quit_button.event("on_click")
+        def quit_game(event):
+            self.game.close()
 
-        self.anchor = self.manager.add(arcade.gui.UIAnchorLayout())
-        self.anchor.add(
+        self.button_box.add(title)
+        self.button_box.add(new_game_button)
+        self.button_box.add(quit_button)
+
+        self.frame.add(
+            child=self.button_box,
             anchor_x="center_x",
-            anchor_y="center_y",
-            child= new_game_button
+            anchor_y="center_y"
         )
         
 
@@ -35,4 +66,3 @@ class MainMenuView(arcade.View):
         if symbol == arcade.key.ENTER:           
             self.window.show_view(self.window.world_map_1)
 
-    
