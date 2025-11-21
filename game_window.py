@@ -2,7 +2,7 @@ import arcade
 from main_menu import MainMenuView
 from world_map1 import WorldMap1View
 
-MAP_SIZE = 100
+MAP_SIZE = 200
 SCALE = 200
 
 WINDOW_TITLE = "NECROMANCER"

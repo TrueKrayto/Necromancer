@@ -44,3 +44,6 @@ class Tile:
     
     def get_center(self):
         return self.sprite.center_x, self.sprite.center_y
+    
+    def get_scale(self):
+        return self.scale

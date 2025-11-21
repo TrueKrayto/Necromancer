@@ -7,5 +7,19 @@ PLAYER_SPRITES = {
 TILE_TEXTURES = {
     "grass": arcade.load_texture("assets/map_tiles/grass_tile.png"),
     "water": arcade.load_texture("assets/map_tiles/water_tile.png"),
-    "black stone": arcade.load_texture("assets/map_tiles/black_stone_tile.png")
+    "black stone": arcade.load_texture("assets/map_tiles/black_stone_tile.png"),
+    "dirt path": arcade.load_texture("assets/map_tiles/dirt_path.png"),
+    "stone path": arcade.load_texture("assets/map_tiles/stone_path.png"),
+    "tilled earth": arcade.load_texture("assets/map_tiles/tilled_earth_01.png")
                 }
+
+BUILDING_TEXTURES = {
+    "house 1": arcade.load_texture("assets/buildings/house_1.png"),
+    "house 2": arcade.load_texture("assets/buildings/house_2.png"),
+    "shop": arcade.load_texture("assets/buildings/shop.png"),
+    "inn": arcade.load_texture("assets/buildings/inn.png"),
+    "barn": arcade.load_texture("assets/buildings/barn.png"),
+    "well": arcade.load_texture("assets/buildings/well.png"),
+    "warehouse": arcade.load_texture("assets/buildings/warehouse.png"),
+    "stall": arcade.load_texture("assets/buildings/stall.png"),
+}
