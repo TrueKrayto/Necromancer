@@ -4,7 +4,7 @@ from pause_menu import PauseMenu
 from arcade import Vec2
 from map_tiles import Tile
 from player import Player
-from test_script import test_village
+from villages import Village
 from buildings import Building
 
 WATER_CHANCE = 10
@@ -82,16 +82,19 @@ class WorldMap1View(arcade.View):
         x, y = self.center_of_map()       
         self.game.player = Player(x, y, self.scale)
         spawn_tile = self.get_tile_at(x,y)
-        spawn_area = self.get_neighbours(spawn_tile, 1, flat=True)
+        spawn_area = self.get_neighbours(spawn_tile, 2, flat=True)
         for tile in spawn_area:
             tile.set_terrain("black stone")
             tile.set_passable(True)
         
         # test village delete later
         row, col = spawn_tile.get_index()
-        self.create_village(test_village, row + 50, col)
-        test_house = Building("house 1", spawn_tile, 3)
-        self.building_sprite_list.append(test_house.get_sprite())
+
+        test_village = Village(spawn_tile, self)
+        for building in test_village.get_buildings():
+            self.building_sprite_list.append(building.get_sprite())
+        
+        
 
     def is_position_passable(self, x, y):
         tile = self.get_tile_at(x, y)
@@ -177,100 +180,4 @@ class WorldMap1View(arcade.View):
 
         return neighbours
 
-    def create_village(self, village, row, col):     
-        radius = village["size"] // 2  
-
-        center_tile = self.get_tile_at_index(row, col)        
-        village_area = self.get_neighbours(center_tile, radius)
-        # reverse the grid for accurate indexing
-        village_area.reverse() 
-       
-        for row in village_area:
-            for tile in row:
-                tile.set_terrain("dirt path")
-                tile.set_passable(True)
-
-        if "well" in village:
-            row = village["well"]["row"]
-            col = village["well"]["col"]
-            tile = village_area[row][col]
-            tile.set_terrain("water")
-            tile.set_passable(False)
-
-        if "inn" in village:
-            row = village["inn"]["row"]
-            col = village["inn"]["col"]
-            tile = village_area[row][col]
-            size = village["inn"]["size"] // 2
-            inn_area = self.get_neighbours(tile, size)
-            for row in inn_area:
-                for tile in row:
-                    tile.set_terrain("black stone")
-                    tile.set_passable(False)
-
-        if "warehouse" in village:
-            row = village["warehouse"]["row"]
-            col = village["warehouse"]["col"]
-            tile = village_area[row][col]
-            size = village["warehouse"]["size"] // 2
-            inn_area = self.get_neighbours(tile, size)
-            for row in inn_area:
-                for tile in row:
-                    tile.set_terrain("black stone")
-                    tile.set_passable(False)
-
-        if "shop" in village:
-            row = village["shop"]["row"]
-            col = village["shop"]["col"]
-            tile = village_area[row][col]
-            size = village["shop"]["size"] // 2
-            inn_area = self.get_neighbours(tile, size)
-            for row in inn_area:
-                for tile in row:
-                    tile.set_terrain("black stone")
-                    tile.set_passable(False)
-
-        if "barn" in village:
-            row = village["barn"]["row"]
-            col = village["barn"]["col"]
-            tile = village_area[row][col]
-            size = village["barn"]["size"] // 2
-            inn_area = self.get_neighbours(tile, size)
-            for row in inn_area:
-                for tile in row:
-                    tile.set_terrain("black stone")
-                    tile.set_passable(False)
-
-        if "houses" in village:
-            size = village["houses"]["size"] // 2
-            for row, cols in village["houses"]["coords"].items():
-                for col in cols:
-                    tile = village_area[row][col]
-                    house_area = self.get_neighbours(tile, size)
-                    for area_row in house_area:
-                        for tile in area_row:
-                            tile.set_terrain("black stone")
-                            tile.set_passable(False)
-
-        if "stalls" in village:
-            for row, cols in village["stalls"]["coords"].items():
-                for col in cols:
-                    tile = village_area[row][col]
-                    tile.set_terrain("black stone")
-                    tile.set_passable(False)
-
-        if "paths" in village:
-            for row, cols in village["paths"]["coords"].items():
-                for col in cols:
-                    tile = village_area[row][col]
-                    tile.set_terrain("stone path")
-                    tile.set_passable(True)
-
-        if "farms" in village:
-            for row, cols in village["farms"]["coords"].items():
-                for col in cols:
-                    tile = village_area[row][col]
-                    tile.set_terrain("tilled earth")
-                    tile.set_passable(True)
-
-        
+   
