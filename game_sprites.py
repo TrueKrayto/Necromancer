@@ -23,3 +23,9 @@ BUILDING_TEXTURES = {
     "warehouse": arcade.load_texture("assets/buildings/warehouse.png"),
     "stall": arcade.load_texture("assets/buildings/stall.png"),
 }
+
+character_textures = {
+    "elf man" : arcade.load_texture("assets/sprites/elf_man_1.png"),
+    "elf woman" : arcade.load_texture("assets/sprites/elf_woman_1.png"),
+    "skeleton" : arcade.load_texture("assets/sprites/skeleton_1.png")
+}

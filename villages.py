@@ -1,5 +1,6 @@
 import arcade
 import random
+from farm_tile import FarmComponent
 from buildings import Building
 from layouts import village_layouts
 
@@ -95,7 +96,9 @@ class Village:
                 for row, cols in self.layout[name]["coords"].items():
                     for col in cols:
                         tile = self.village_area[row][col]
-                        tile.set_terrain(texture)
-                        if texture == "tilled earth":
+                        if name == "farms":
+                            tile.add_component(FarmComponent())
                             self.farm_tiles.append(tile)
+                        tile.set_terrain(texture)
+                        
  
