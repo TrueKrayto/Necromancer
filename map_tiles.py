@@ -28,7 +28,7 @@ class Tile:
         self.component.set_up(self)
 
     def interact(self, item, user):
-        if self.component:
+        if self.component:            
             self.component.interact(item, user)
         return
 
@@ -37,15 +37,19 @@ class Tile:
             self.passable = value
         return
 
-    def add_entity(self, entity):
+    def add_entity(self, entity):             
         self.entities.append(entity)
         self.has_entity = True
+        if hasattr(entity, "sprite") and entity.sprite:                    
+                    self.map.entity_sprite_list.append(entity.get_sprite())
 
     def get_sprite(self):
         return self.sprite
 
     def draw(self):
-        arcade.draw_sprite(self.sprite)
+        # this draw function is obsolete only use for testing
+        # add sprites to appropriate View sprite lists                           
+        pass
 
     def set_terrain(self, terrain):               
         if terrain in TILE_TEXTURES:

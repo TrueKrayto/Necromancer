@@ -1,5 +1,7 @@
 import arcade
+import re
 import random
+from npc import NPC
 from farm_tile import FarmComponent
 from buildings import Building
 from layouts import village_layouts
@@ -7,6 +9,7 @@ from layouts import village_layouts
 class Village:
     def __init__(self, tile, map):
         self.map = map
+        self.villager_list = []
         self.center_tile = tile
         self.buildings = []
         self.layout = random.choice(village_layouts)
@@ -15,8 +18,7 @@ class Village:
         # reverse the grid for accurate indexing
         self.village_area.reverse()
         #array to hold the farm tiles for npc access
-        self.farm_tiles = []
-
+        self.farm_tiles = []        
         self.set_up()
 
     def get_buildings(self):
@@ -24,12 +26,13 @@ class Village:
 
     def set_up(self):
         self.clear_ground()
+        self.terrain()
         self.large_buildings()
         self.small_buildings()
         self.houses()
         self.wells()
-        self.terrain()
-
+        self.villagers()
+        
     def clear_ground(self):
         # clears the tiles in the village sets them to passable and default terrain
         for row in self.village_area:
@@ -101,4 +104,17 @@ class Village:
                             self.farm_tiles.append(tile)
                         tile.set_terrain(texture)
                         
- 
+    def villagers(self):      
+        for building in self.buildings:
+            text = building.building_type
+            if re.search(r"\bhouse\b", text):
+               tile = building.get_entrance()
+               x, y = tile.get_center()
+               male = NPC("elf man", x, y, self.map)
+               self.villager_list.append(male)
+               female = NPC("elf woman", x, y, self.map)
+               self.villager_list.append(female)
+        for villager in self.villager_list:
+            sprite = villager.get_sprite()
+            self.map.npc_sprite_list.append(sprite)
+            self.map.npc_list.append(villager)

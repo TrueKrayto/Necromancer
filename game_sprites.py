@@ -4,6 +4,15 @@ PLAYER_SPRITES = {
         "idle_1":"assets/sprites/player_idle_2.png"
                   }
 
+PLANT_SPRITES = {
+    "planted_seed":arcade.load_texture("assets/crop_sprites/buried_seed_01.png"),
+    "sprout":arcade.load_texture("assets/crop_sprites/sprout.png"),
+    "cabbage_plant":arcade.load_texture("assets/crop_sprites/cabbage_plant.png"),
+    "pine_tree":arcade.load_texture("assets/crop_sprites/pine_tree.png"),
+    "sapling":arcade.load_texture("assets/crop_sprites/sapling_pine.png"),
+    "stump_pine":arcade.load_texture("assets/crop_sprites/stump_pine.png"),
+}
+
 TILE_TEXTURES = {
     "grass": arcade.load_texture("assets/map_tiles/grass_tile.png"),
     "water": arcade.load_texture("assets/map_tiles/water_tile.png"),
@@ -27,5 +36,5 @@ BUILDING_TEXTURES = {
 character_textures = {
     "elf man" : arcade.load_texture("assets/sprites/elf_man_1.png"),
     "elf woman" : arcade.load_texture("assets/sprites/elf_woman_1.png"),
-    "skeleton" : arcade.load_texture("assets/sprites/skeleton_1.png")
+    "skeleton" : arcade.load_texture("assets/sprites/Skeleton_1.png")
 }

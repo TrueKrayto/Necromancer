@@ -22,7 +22,7 @@ class NPC:
         self.path = []
 
         self.idle_mode = True
-        self.speed = 200
+        self.speed = 200 + random.randint(-20,20)
 
     def get_sprite(self):
         return self.sprite

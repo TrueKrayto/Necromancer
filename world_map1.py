@@ -18,6 +18,9 @@ class WorldMap1View(arcade.View):
         self.tile_grid = []
         self.tile_sprite_list = arcade.SpriteList()
         self.building_sprite_list = arcade.SpriteList()
+        self.npc_sprite_list = arcade.SpriteList()
+        self.entity_sprite_list = arcade.SpriteList()
+        self.npc_list = []
         self.game = game
         self.held_keys = set()
         self.camera = arcade.Camera2D()       
@@ -26,10 +29,7 @@ class WorldMap1View(arcade.View):
         # The pause menu  
         self.pause_menu = PauseMenu(self.game, self)
         self.pause_menu.pause_frame()
-        # test lists
-        self.test_villagers = []
-
-
+       
 
     def on_update(self, delta_time):
         if not self.paused:
@@ -37,10 +37,10 @@ class WorldMap1View(arcade.View):
                 self.game.player.update(delta_time, self.held_keys, self)
                 self.center_camera_to_player()
                 # slightly redundant call, sprite list removes need for this
-                self.select_visible_tiles()
-            for villager in self.test_villagers:
-                villager.update(delta_time)
-     
+                self.select_visible_tiles()            
+            for npc in self.npc_list:
+                npc.update(delta_time)
+
     def toggle_pause(self):
         self.paused = not self.paused
         if self.paused:
@@ -52,10 +52,13 @@ class WorldMap1View(arcade.View):
         self.clear()
         self.camera.use()
         self.tile_sprite_list.draw()
+        
+        self.entity_sprite_list.draw()
+        self.npc_sprite_list.draw()
         self.building_sprite_list.draw()
-
+        
         if self.game.player:
-            self.game.player.draw() 
+            self.game.player.draw()       
 
         if self.paused:
             self.pause_menu.manager.draw()
@@ -100,15 +103,7 @@ class WorldMap1View(arcade.View):
         test_village = Village(spawn_tile, self)
         for building in test_village.get_buildings():
             self.building_sprite_list.append(building.get_sprite())
-        #test villager
-        for i in range(100):  
-            test_villager = NPC("elf woman", x, y, self)
-            self.test_villagers.append(test_villager)
-            self.building_sprite_list.append(test_villager.get_sprite())
-        for i in range(100):  
-            test_villager = NPC("elf man", x, y, self)
-            self.test_villagers.append(test_villager)
-            self.building_sprite_list.append(test_villager.get_sprite())
+               
         
     def is_position_passable(self, x, y):
         tile = self.get_tile_at(x, y)
@@ -124,7 +119,6 @@ class WorldMap1View(arcade.View):
                     self.test_villagers.append(test_skeleton)
                     self.building_sprite_list.append(test_skeleton.get_sprite())
                 
-
     def get_world_pos(self, x, y):
         camera_x, camera_y = self.camera.position
         screen_w, screen_h = self.game.get_screen_dimensions()
@@ -141,7 +135,11 @@ class WorldMap1View(arcade.View):
 
     def on_key_press(self, symbol, modifiers):
         if symbol == arcade.key.ESCAPE:
-            self.toggle_pause()        
+            self.toggle_pause()
+        elif symbol == arcade.key.E and self.game.player:
+            x, y = self.game.player.get_position()
+            tile = self.get_tile_at(x, y)
+            self.game.player.interact(tile)        
         else:
             self.held_keys.add(symbol)
         

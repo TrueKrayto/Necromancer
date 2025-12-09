@@ -1,6 +1,7 @@
 import arcade
 from main_menu import MainMenuView
 from world_map1 import WorldMap1View
+from buildings import BuildingInteriorView
 
 MAP_SIZE = 200
 SCALE = 200
@@ -14,6 +15,7 @@ class GameView(arcade.Window):
         self.player = None   
         self.main_menu = MainMenuView(self)
         self.world_map_1 = WorldMap1View(self, MAP_SIZE, SCALE)
+        self.building_interior = BuildingInteriorView(self)
         self.show_view(self.main_menu)
           
 

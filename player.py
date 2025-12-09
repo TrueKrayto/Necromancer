@@ -1,6 +1,6 @@
 import arcade
 from game_sprites import PLAYER_SPRITES
-
+from crops import Seed
 
 class Player:
     def __init__(self, x, y, scale):
@@ -13,7 +13,8 @@ class Player:
         # Scale so sprite matches your tile scale
         self.sprite.scale = scale / texture.width     
         self.speed = 200
-
+        
+        self.held_item = Seed("cabbage")
     # ------------------------------
     # Drawing
     # ------------------------------
@@ -74,3 +75,6 @@ class Player:
         if world.is_position_passable(self.sprite.center_x, feet_y_new):
             # Move center, not feet
             self.sprite.center_y = new_y
+
+    def interact(self, tile):
+        tile.interact(self.held_item, self)
