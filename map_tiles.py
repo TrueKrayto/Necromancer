@@ -65,3 +65,6 @@ class Tile:
     
     def get_scale(self):
         return self.scale
+    
+    def get_entities(self):
+         return self.entities

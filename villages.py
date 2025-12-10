@@ -1,10 +1,12 @@
 import arcade
 import re
 import random
-from npc import NPC
+from villager import Villager
 from farm_tile import FarmComponent
 from buildings import Building
 from layouts import village_layouts
+from farm_tile import FarmComponent
+
 
 class Village:
     def __init__(self, tile, map):
@@ -20,6 +22,7 @@ class Village:
         #array to hold the farm tiles for npc access
         self.farm_tiles = []        
         self.set_up()
+        self.manager = VillageManager(self)
 
     def get_buildings(self):
         return self.buildings
@@ -110,11 +113,27 @@ class Village:
             if re.search(r"\bhouse\b", text):
                tile = building.get_entrance()
                x, y = tile.get_center()
-               male = NPC("elf man", x, y, self.map)
+               male = Villager("elf man", x, y, self.map, self)
                self.villager_list.append(male)
-               female = NPC("elf woman", x, y, self.map)
+               female = Villager("elf woman", x, y, self.map, self)
+               #female.assign_job("farmer")
                self.villager_list.append(female)
+
         for villager in self.villager_list:
             sprite = villager.get_sprite()
             self.map.npc_sprite_list.append(sprite)
             self.map.npc_list.append(villager)
+
+        
+class VillageManager:
+    def __init__(self, village):
+        self.village = village
+        self.faction = None
+
+    def update(self, delta_time):
+        for villager in self.village.villager_list:
+            villager.update(delta_time)
+        for tile in self.village.farm_tiles:
+            farm = tile.component
+            if isinstance(farm, FarmComponent) and farm.crop:
+                farm.crop.update(delta_time)

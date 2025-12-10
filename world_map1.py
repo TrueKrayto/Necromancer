@@ -7,6 +7,7 @@ from player import Player
 from villages import Village
 from buildings import Building
 from npc import NPC
+from villager import Villager
 
 WATER_CHANCE = 10
 
@@ -29,7 +30,8 @@ class WorldMap1View(arcade.View):
         # The pause menu  
         self.pause_menu = PauseMenu(self.game, self)
         self.pause_menu.pause_frame()
-       
+        #test
+        self.test_village = None
 
     def on_update(self, delta_time):
         if not self.paused:
@@ -38,8 +40,7 @@ class WorldMap1View(arcade.View):
                 self.center_camera_to_player()
                 # slightly redundant call, sprite list removes need for this
                 self.select_visible_tiles()            
-            for npc in self.npc_list:
-                npc.update(delta_time)
+            self.test_village.manager.update(delta_time)
 
     def toggle_pause(self):
         self.paused = not self.paused
@@ -100,11 +101,10 @@ class WorldMap1View(arcade.View):
         # test village delete later
         row, col = spawn_tile.get_index()
 
-        test_village = Village(spawn_tile, self)
-        for building in test_village.get_buildings():
+        self.test_village = Village(spawn_tile, self)
+        for building in self.test_village.get_buildings():
             self.building_sprite_list.append(building.get_sprite())
-               
-        
+                    
     def is_position_passable(self, x, y):
         tile = self.get_tile_at(x, y)
         if tile is None:
@@ -114,9 +114,10 @@ class WorldMap1View(arcade.View):
     def on_mouse_press(self, x, y, button, modifiers):
             if button == arcade.MOUSE_BUTTON_RIGHT:
                 world_x, world_y = self.get_world_pos(x, y)
-                for i in range(500):
-                    test_skeleton = NPC("skeleton", world_x, world_y, self)
-                    self.test_villagers.append(test_skeleton)
+                for i in range(1):
+                    test_skeleton = Villager("skeleton", world_x, world_y, self, self.test_village)
+                    test_skeleton.assign_job("farmer")
+                    self.test_village.villager_list.append(test_skeleton)
                     self.building_sprite_list.append(test_skeleton.get_sprite())
                 
     def get_world_pos(self, x, y):

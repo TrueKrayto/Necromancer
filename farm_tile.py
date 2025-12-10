@@ -7,7 +7,8 @@ class FarmComponent:
         self.center_x = None
         self.center_y = None
         self.planted = False
-        self.assaigned = False
+        self.assigned = False
+        self.crop = None
 
     def set_up(self, tile):
         self.tile = tile
@@ -17,8 +18,8 @@ class FarmComponent:
         self.tile.set_passable(True)
         self.center_x, self.center_y = self.tile.get_center()
     
-    def toggle_assaigned(self):
-        self.assaigned = not self.assaigned
+    def toggle_assigned(self):
+        self.assigned = not self.assigned
 
     def interact(self, item, user):
         if isinstance(item, Seed):           
@@ -29,5 +30,6 @@ class FarmComponent:
             return
         else:            
             crop = Plant(seed.type, self.tile)
+            self.crop = crop
             self.tile.add_entity(crop)
             self.planted = True
