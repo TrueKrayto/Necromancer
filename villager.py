@@ -5,16 +5,22 @@ class Villager(NPC):
     def __init__(self, name, x, y, map, village):
         super().__init__(name, x, y, map)
         self.village = village
+        self.manager = self.village.manager
         self.valid_jobs = ["farmer", "shopkeeper", "innkeeper"]
         self.job = None
         self.current_task = None
         self.target_tile = None
         self.inventory = []
+        self.working = False        
 
-        # --- Task timing / animation pause ---
-        self.performing_task = False
-        self.task_timer = 0
-        self.task_durations = {"planting": 2.5, "watering":1} # seconds spent doing a farm task
+    def start_working(self):
+        self.working = True
+
+    def stop_working(self):
+        self.working = False
+
+    def assign_manager(self, manager):
+        self.manager = manager
 
     def assign_job(self, job):
         if job in self.valid_jobs:
@@ -22,99 +28,87 @@ class Villager(NPC):
             self.idle_mode = False
 
     def update(self, delta_time):
-        if self.job == "farmer":
-            self.farming_update(delta_time)
-        else:
+        # NOTE:
+        # Task failure / recovery logic (e.g. path failure, releasing tree/tile assignments)
+        # is currently handled here in Villager.update().
+        # This is temporary.
+        # Long-term, tasks themselves should own:
+        # - validation (is location still valid?)
+        # - failure handling
+        # - assignment / unassignment of tiles, trees, etc.
+        # NPC logic should only execute tasks, not manage world state.
+        # --------------------------------------------------
+        # ABORT TASK ONLY IF PATHFINDING ACTUALLY FAILED
+        # --------------------------------------------------
+        if self.current_task and self.target is not None and not self.path:
+            # release tree assignment if needed
+            if hasattr(self.current_task, "tree") and self.current_task.tree:
+                self.current_task.tree.assigned = False
+
+            self.current_task = None
+            self.target = None
+            self.working = False
+            self.idle_mode = True
+            return
+
+        # --------------------------------------------------
+        # 1) IF NO TASK, TRY TO GET ONE
+        # --------------------------------------------------
+        if self.current_task is None:
+            self.current_task = self.manager.choose_task(self)
+
+        # --------------------------------------------------
+        # 2) STILL NO TASK → IDLE / WANDER
+        # --------------------------------------------------
+        if self.current_task is None:
+            self.idle_mode = True
             super().update(delta_time)
-
-    # -----------------------------------------------------------------------
-    #   FARMER LOGIC
-    # -----------------------------------------------------------------------
-
-    def farming_update(self, delta_time):
-
-        # --- If currently performing a task, remain paused until timer expires ---
-        if self.performing_task:
-            self.task_timer -= delta_time
-            if self.task_timer <= 0:
-                self.finish_farm_task()
             return
 
-        # --- No active task: try to find one ---
-        if not self.current_task:
-            found_task = self.find_farm_task()
+        # --------------------------------------------------
+        # 3) SET MOVEMENT TARGET IF NOT SET
+        # --------------------------------------------------
+        if self.target is None:
+            tx, ty = self.current_task.location
+            self.set_target(tx, ty)
+            self.path_to_position(tx, ty)
 
-            # No farm tasks -> idle
-            if not found_task:
-                self.idle_mode = True
-                super().update(delta_time)  # wander
-                return
-
-            # Task found -> stop idle wandering
-            self.idle_mode = False
+        # --------------------------------------------------
+        # 4) MOVE TOWARDS TASK LOCATION
+        # --------------------------------------------------
+        x, y = self.get_position()
+        if not self.current_task.at_location(x, y):
+            super().update(delta_time)
             return
 
-        # --- Move toward the assigned task tile ---
-        super().update(delta_time)
-
-        # When we reach the tile: begin the timed task animation
-        if self.target and self._at_position(*self.target):
-            self.perform_farm_task()
-
-    def find_farm_task(self):       
-        # --- 1) PLANTING task ---
-        for tile in self.village.farm_tiles:
-            farm = tile.component
-            if not farm.planted and not farm.assigned:
-                x, y = tile.get_center()
-                self.set_target(x, y)
-                self.path_to_position(x, y)
-                self.current_task = "planting"                
-                self.target_tile = tile
-                farm.toggle_assigned()
-                self.idle_mode = False
-                return True
-
-        # --- 2) WATERING task ---
-        for tile in self.village.farm_tiles:
-            farm = tile.component
-            if farm.planted and not farm.crop.watered and not farm.assigned:
-                x, y = tile.get_center()
-                self.set_target(x, y)
-                self.path_to_position(x, y)
-                self.current_task = "watering"                
-                self.target_tile = tile
-                farm.toggle_assigned()
-                self.idle_mode = False
-                return True
-
-        # --- No tasks found ---
-        return False
-
-    # -----------------------------------------------------------------------
-    #   TASK TIMING SYSTEM
-    # -----------------------------------------------------------------------
-
-    def perform_farm_task(self):
-        """Begin a timed farm task pause."""
+        # --------------------------------------------------
+        # 5) ARRIVED AT TASK LOCATION
+        # --------------------------------------------------
         self.target = None
-        self.performing_task = True
-        self.task_timer = self.task_durations.get(self.current_task, 1.0)  # begin countdown
 
-    def finish_farm_task(self):
-        """Finish the farm task after the delay finishes."""
-        farm = self.target_tile.component
+        # --------------------------------------------------
+        # TASK EXECUTION
+        # --------------------------------------------------
 
-        if self.current_task == "planting":
-            item = Seed("cabbage")  # later pull seeds from storage
-            farm.interact(item, self)
-            farm.toggle_assigned()
+        # Start task if not started
+        if not self.current_task.started:
+            self.current_task.on_start(self)
+            return
 
-        elif self.current_task == "watering":
-            farm.crop.water()
-            farm.toggle_assigned()
+        # Update running task
+        if not self.current_task.task_completed:
+            self.current_task.on_update(self, delta_time)
+            return
 
-        # Reset task state
+        # --------------------------------------------------
+        # TASK COMPLETED
+        # --------------------------------------------------
+        self.current_task.on_complete(self)
+        self.manager.complete_task(self.current_task)
+
         self.current_task = None
-        self.target_tile = None
-        self.performing_task = False
+        self.working = False
+        self.idle_mode = True
+
+        # resume idle behavior immediately
+        super().update(delta_time)

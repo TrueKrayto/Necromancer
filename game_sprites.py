@@ -8,6 +8,11 @@ PLANT_SPRITES = {
     "planted_seed":arcade.load_texture("assets/crop_sprites/buried_seed_01.png"),
     "sprout":arcade.load_texture("assets/crop_sprites/sprout.png"),
     "cabbage_plant":arcade.load_texture("assets/crop_sprites/cabbage_plant.png"),
+    
+}
+
+TREE_SPRITES = {
+    "planted_seed":arcade.load_texture("assets/crop_sprites/buried_seed_01.png"),
     "pine_tree":arcade.load_texture("assets/crop_sprites/pine_tree.png"),
     "sapling":arcade.load_texture("assets/crop_sprites/sapling_pine.png"),
     "stump_pine":arcade.load_texture("assets/crop_sprites/stump_pine.png"),

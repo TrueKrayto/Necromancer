@@ -10,8 +10,8 @@ from game_sprites import PLANT_SPRITES
 
 plants = {
     "cabbage":{
-        "growth time":30,
-        "growth stages":[20,10],
+        "growth time":60,
+        "growth stages":[40,10],
         "harvest":(5,5),
         "stage 1":PLANT_SPRITES["sprout"],
         "stage 2":PLANT_SPRITES["cabbage_plant"]
@@ -69,4 +69,4 @@ class Plant:
                 self.growth_stage += 1
                 self.change_sprite(self.data[f"stage {self.growth_stage}"])
 
-        
+    

@@ -64,7 +64,7 @@ class Player:
         feet_y_current = self.sprite.center_y - (self.sprite.height / 2) + offset
 
         # X-axis collision
-        if world.is_position_passable(new_x, feet_y_current):
+        if world.map_manager.is_position_passable(new_x, feet_y_current):
             self.sprite.center_x = new_x
 
         # ---------------------------
@@ -72,7 +72,7 @@ class Player:
         # ---------------------------
         feet_y_new = new_y - (self.sprite.height / 2) + offset
 
-        if world.is_position_passable(self.sprite.center_x, feet_y_new):
+        if world.map_manager.is_position_passable(self.sprite.center_x, feet_y_new):
             # Move center, not feet
             self.sprite.center_y = new_y
 

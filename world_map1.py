@@ -8,6 +8,9 @@ from villages import Village
 from buildings import Building
 from npc import NPC
 from villager import Villager
+from map_tiles import Tile
+from tile_map import TileMap
+from WorldUI import WorldUI
 
 WATER_CHANCE = 10
 
@@ -15,8 +18,7 @@ class WorldMap1View(arcade.View):
     def __init__(self, game, map_size, scale):
         super().__init__()
         self.map_size = map_size
-        self.scale = scale
-        self.tile_grid = []
+        self.scale = scale        
         self.tile_sprite_list = arcade.SpriteList()
         self.building_sprite_list = arcade.SpriteList()
         self.npc_sprite_list = arcade.SpriteList()
@@ -26,28 +28,41 @@ class WorldMap1View(arcade.View):
         self.held_keys = set()
         self.camera = arcade.Camera2D()       
         self.visible_tiles = []  
-        self.paused = False 
+        self.paused = False
+        self.tree_manager = TempTreeManager()
+        # UI manager
+        self.world_ui = WorldUI(self)
+        # setting up the map
+        self.map = TileMap(self, self.map_size, self.map_size, Tile, self.scale)
+        self.map.generate_map(set_up=True, sprite_list=self.tile_sprite_list)
+        self.tile_grid = self.map.get_map()
+        self.map_manager = self.map.manager
+        
         # The pause menu  
         self.pause_menu = PauseMenu(self.game, self)
         self.pause_menu.pause_frame()
         #test
         self.test_village = None
-
+        
     def on_update(self, delta_time):
         if not self.paused:
             if self.game.player:
                 self.game.player.update(delta_time, self.held_keys, self)
                 self.center_camera_to_player()
                 # slightly redundant call, sprite list removes need for this
-                self.select_visible_tiles()            
-            self.test_village.manager.update(delta_time)
+                self.select_visible_tiles()
+            if self.test_village is not None:          
+                self.test_village.manager.update(delta_time)
+            self.tree_manager.update(delta_time)
 
     def toggle_pause(self):
         self.paused = not self.paused
         if self.paused:
+            self.world_ui.disable()
             self.pause_menu.manager.enable()
         else:
             self.pause_menu.manager.disable()
+            self.world_ui.enable()
 
     def on_draw(self):
         self.clear()
@@ -63,37 +78,24 @@ class WorldMap1View(arcade.View):
 
         if self.paused:
             self.pause_menu.manager.draw()
+        self.world_ui.manager.draw()
 
     def on_show_view(self):        
-        self.background_color = arcade.csscolor.WHITE        
-        if not self.tile_grid:
-            self.generate_tile_map()
+        self.background_color = arcade.csscolor.WHITE       
+        
         if self.game.player is None:
             self.create_player()  
 
     def clear_all(self):
         self.tile_grid.clear()
         self.tile_sprite_list.clear()
-        self.visible_tiles.clear()
-
-    def generate_tile_map(self):
-        self.tile_grid.clear()
-        for y in range(self.map_size):
-            row = []
-            for x in range(self.map_size):
-                tile = Tile(x, y, self.scale, self)
-                if random.randint(0,100) <= WATER_CHANCE:
-                    tile.set_terrain("water")
-                    tile.set_passable(False)
-                row.append(tile)
-                self.tile_sprite_list.append(tile.get_sprite())
-            self.tile_grid.append(row)        
+        self.visible_tiles.clear()      
 
     def create_player(self):
-        x, y = self.center_of_map()       
+        x, y = self.map_manager.center_of_map()       
         self.game.player = Player(x, y, self.scale)
-        spawn_tile = self.get_tile_at(x,y)
-        spawn_area = self.get_neighbours(spawn_tile, 2, flat=True)
+        spawn_tile = self.map_manager.get_tile_at(x,y)
+        spawn_area = self.map_manager.get_neighbours(spawn_tile, 2, flat=True)
         for tile in spawn_area:
             tile.set_terrain("black stone")
             tile.set_passable(True)
@@ -105,16 +107,32 @@ class WorldMap1View(arcade.View):
         for building in self.test_village.get_buildings():
             self.building_sprite_list.append(building.get_sprite())
                     
-    def is_position_passable(self, x, y):
-        tile = self.get_tile_at(x, y)
-        if tile is None:
-            return False
-        return tile.passable
-
     def on_mouse_press(self, x, y, button, modifiers):
+            # -------------------------
+            # LEFT CLICK (UI / buildings)
+            # -------------------------
+            if self.world_ui.has_active_panel():
+                if self.world_ui.click_is_on_panel(x, y):
+                    return
+            if button == arcade.MOUSE_BUTTON_LEFT:
+                world_x, world_y = self.get_world_pos(x, y)
+
+                tile = self.map_manager.get_tile_at(world_x, world_y)                
+                if not tile:
+                    return
+
+                if hasattr(tile, "building") and tile.building:
+                    from building_panels import BuildingPanel
+                    panel = BuildingPanel(self, tile.building, self.world_ui.manager)
+                    self.world_ui.open_panel(panel)
+                    return
+                
+            # -------------------------
+            # RIGHT CLICK (Skeletons!!!!!)
+            # -------------------------    
             if button == arcade.MOUSE_BUTTON_RIGHT:
                 world_x, world_y = self.get_world_pos(x, y)
-                for i in range(1):
+                for i in range(1000):
                     test_skeleton = Villager("skeleton", world_x, world_y, self, self.test_village)
                     test_skeleton.assign_job("farmer")
                     self.test_village.villager_list.append(test_skeleton)
@@ -139,7 +157,7 @@ class WorldMap1View(arcade.View):
             self.toggle_pause()
         elif symbol == arcade.key.E and self.game.player:
             x, y = self.game.player.get_position()
-            tile = self.get_tile_at(x, y)
+            tile = self.map_manager.get_tile_at(x, y)
             self.game.player.interact(tile)        
         else:
             self.held_keys.add(symbol)
@@ -151,69 +169,61 @@ class WorldMap1View(arcade.View):
         x, y = self.game.player.get_position()
         self.camera.position = Vec2(x,y)
 
-    def get_tile_at(self, x, y):
-        tile_index_x = int(x // self.scale)
-        tile_index_y = int(y // self.scale)
-        if 0 <= tile_index_y < len(self.tile_grid):
-            if 0 <= tile_index_x < len(self.tile_grid[tile_index_y]):
-                return self.tile_grid[tile_index_y][tile_index_x]
-        return None
-    
-    def get_tile_at_index(self, row, col):
-        if row > len(self.tile_grid) or row < 0:
-            return None
-        if col > len(self.tile_grid[row]) or col < 0:
-            return None
-        return self.tile_grid[row][col]
-
     def select_visible_tiles(self):        
         radius = 10
         self.visible_tiles.clear()
         player_pos_x, player_pos_y = self.game.player.get_position()        
-        current_tile = self.get_tile_at(player_pos_x, player_pos_y)
+        current_tile = self.map_manager.get_tile_at(player_pos_x, player_pos_y)
         if current_tile is None:             
              return
         
         tile_row, tile_col = current_tile.get_index()
-        rows = self.slice_around(self.tile_grid, tile_row, radius)
+        rows = self.map_manager.slice_around(self.map.tile_map, tile_row, radius)
         for row in rows:
-            cols = self.slice_around(row, tile_col, radius)
-            self.visible_tiles.append(cols)         
-        
-    def slice_around(self, lst, index, distance):
-        start = max(index - distance, 0)
-        end = index + distance + 1
-        return lst[start:end]
-    
-    def center_of_map(self):
-        mid_y = len(self.tile_grid) // 2          
-        mid_x = len(self.tile_grid[mid_y]) // 2          
-        return self.tile_grid[mid_y][mid_x].get_center()
-    
-    def get_neighbours(self, tile, distance, grid=None, flat=False, include_center=True):
-        neighbours = []
-        row, col = tile.get_index()
+            cols = self.map_manager.slice_around(row, tile_col, radius)
+            self.visible_tiles.append(cols)                 
 
-        rows_in_range = self.slice_around(self.tile_grid, row, distance)
-        for r in rows_in_range:
-            cols_in_range = self.slice_around(r, col, distance)
-            neighbours.append(cols_in_range)
 
-        # Flatten if requested
-        if flat:
-            flat_list = [t for row in neighbours for t in row]
-        
-            if not include_center:
-                flat_list = [t for t in flat_list if t is not tile]
-        
-            return flat_list
+class TempTreeManager:
+    def __init__(self, bucket_count=10, batch_interval=0.5):
+        self.bucket_count = bucket_count
+        self.batch_interval = batch_interval
 
-        # If not flat, remove center tile from 2D result if needed
-        if not include_center:
-            for r in neighbours:
-                if tile in r:
-                    r.remove(tile)
+        # buckets of trees
+        self.buckets = [[] for _ in range(bucket_count)]
 
-        return neighbours
+        # round-robin state
+        self.current_bucket = 0
+        self.timer = batch_interval
 
-   
+        # used for auto-assignment
+        self._assign_index = 0
+
+    def update(self, dt):
+        self.timer -= dt
+        if self.timer > 0:
+            return
+
+        # full growth time each tree should receive
+        growth_delta = self.batch_interval * self.bucket_count
+
+        bucket = self.buckets[self.current_bucket]
+        for tree in bucket:
+            tree.update(growth_delta)
+
+        # advance to next bucket
+        self.current_bucket = (self.current_bucket + 1) % self.bucket_count
+        self.timer = self.batch_interval
+
+    def add_tree(self, tree):
+        # round-robin assignment to keep buckets balanced
+        bucket_index = self._assign_index % self.bucket_count
+        self.buckets[bucket_index].append(tree)
+        self._assign_index += 1
+
+    def remove_tree(self, tree):
+        # trees are few compared to updates; linear search is fine
+        for bucket in self.buckets:
+            if tree in bucket:
+                bucket.remove(tree)
+                return

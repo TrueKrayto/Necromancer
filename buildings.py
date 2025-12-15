@@ -33,11 +33,19 @@ class Building:
         self.set_up()
 
     def set_up(self):
-        self.map = self.tile.map
+        self.map = self.tile.map   
+
         center_row, center_col = self.tile.get_index()
         offset = (self.size // 2) + 1
-        self.entrance_tile = self.map.get_tile_at_index(center_row - offset, center_col)
-        self.entrance_tile.add_component(BuildinInteriorComponent())
+
+        self.entrance_tile = self.map.map_manager.get_tile_at_index(center_row - offset, center_col)
+        self.entrance_tile.add_component(BuildinInteriorComponent())     
+        radius = self.size // 2  
+         
+        owned_tiles = self.map.map_manager.get_neighbours(self.tile, radius, flat=True)
+        for tile in owned_tiles:
+            tile.set_passable(False)
+            tile.building = self
 
     def get_entrance(self):
         return self.entrance_tile
